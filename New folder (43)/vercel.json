@@ -7,6 +7,7 @@
     { "src": "api/*.py", "use": "@vercel/python" }
   ],
   "routes": [
+    { "src": "/api/products", "dest": "/api/products.py" },
     { "src": "/api/paypal-ipn", "dest": "/api/paypal-ipn.py" },
     { "src": "/api/(.*)", "dest": "/api/index.py" },
     { "src": "/(.*)", "dest": "/$1" }
