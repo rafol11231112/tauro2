@@ -1,84 +1,231 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Login - Your Store</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="background-dots"></div>
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const showRegister = document.getElementById('showRegister');
+    const showLogin = document.getElementById('showLogin');
+
+    // Get stored users or initialize empty array
+    const getUsers = () => JSON.parse(localStorage.getItem('users') || '[]');
+    const saveUsers = (users) => localStorage.setItem('users', JSON.stringify(users));
+
+    // Toggle between login and register forms
+    showRegister?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+    });
+
+    showLogin?.addEventListener('click', (e) => {
+        e.preventDefault();
+        registerForm.style.display = 'none';
+        loginForm.style.display = 'block';
+    });
+
+    // Handle login
+    loginForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = e.target.email.value.toLowerCase();
+        const password = e.target.password.value;
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                localStorage.setItem('customerLoggedIn', 'true');
+                localStorage.setItem('customerEmail', email);
+                localStorage.setItem('customerName', data.user.fullname);
+                window.location.href = 'index.html';
+            } else {
+                alert(data.message || 'Login failed');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('Login failed. Please try again.');
+        }
+    });
+
+    // Handle registration
+    registerForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fullname = e.target.fullname.value;
+        const email = e.target.email.value.toLowerCase();
+        const password = e.target.password.value;
+        const confirmPassword = e.target.confirm_password.value;
+
+        if (password !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ fullname, email, password })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // Store user data
+                const users = getUsers();
+                users.push(data.user);
+                saveUsers(users);
+
+                // Auto login after registration
+                localStorage.setItem('customerLoggedIn', 'true');
+                localStorage.setItem('customerEmail', email);
+                localStorage.setItem('customerName', fullname);
+                
+                alert('Registration successful!');
+                window.location.href = 'index.html';
+            } else {
+                alert(data.message || 'Registration failed');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            alert('Registration failed. Please try again.');
+        }
+    });
+
+    // Update verification button handlers
+    const verifyBtn = document.querySelector('.verify-btn');
+    const resendBtn = document.querySelector('.resend-btn');
+
+    if (verifyBtn) {
+        verifyBtn.addEventListener('click', async () => {
+            const code = document.getElementById('verificationCode').value;
+            if (!code) {
+                alert('Please enter verification code');
+                return;
+            }
+
+            try {
+                const verifyResponse = await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: pendingEmail, code })
+                });
+                
+                const verifyData = await verifyResponse.json();
+                if (verifyData.success) {
+                    localStorage.setItem('customerLoggedIn', 'true');
+                    localStorage.setItem('customerEmail', pendingEmail);
+                    localStorage.setItem('customerName', pendingFullname);
+                    alert('Registration successful!');
+                    window.location.href = returnUrl;
+                } else {
+                    alert(verifyData.message || 'Verification failed');
+                }
+            } catch (error) {
+                alert('Verification failed. Please try again.');
+            }
+        });
+    }
+
+    if (resendBtn) {
+        resendBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        email: pendingEmail, 
+                        fullname: pendingFullname,
+                        password: document.querySelector('#registerForm input[type="password"]').value
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('New verification code sent to your email');
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('Failed to resend code. Please try again.');
+            }
+        });
+    }
+
+    // Add password requirements
+    const passwordInputs = document.querySelectorAll('input[type="password"]');
+    passwordInputs.forEach(input => {
+        input.pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
+        input.title = "Password must be at least 8 characters long and include uppercase, lowercase, and numbers";
+    });
+
+    // Add this to handle the code inputs
+    document.querySelectorAll('.code-input').forEach(input => {
+        input.addEventListener('keyup', (e) => {
+            if (e.key >= 0 && e.key <= 9) {
+                const next = input.nextElementSibling;
+                if (next && next.classList.contains('code-input')) {
+                    next.focus();
+                }
+            } else if (e.key === 'Backspace') {
+                const prev = input.previousElementSibling;
+                if (prev && prev.classList.contains('code-input')) {
+                    prev.focus();
+                }
+            }
+            
+            // Combine all inputs into hidden field
+            const code = Array.from(document.querySelectorAll('.code-input'))
+                .map(input => input.value)
+                .join('');
+            document.getElementById('verificationCode').value = code;
+        });
+    });
+});
+
+// Add this function to handle guest mode
+function enterGuestMode() {
+    localStorage.setItem('customerLoggedIn', 'true');
+    localStorage.setItem('customerEmail', 'guest@user.com');
+    localStorage.setItem('customerName', 'Guest User');
+    localStorage.setItem('isGuestMode', 'true');
     
-    <div class="login-container">
-        <form id="loginForm" class="login-form">
-            <h2>Customer Login</h2>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="password" required>
-            </div>
-            <button type="submit" class="primary-btn">Login</button>
-            <div class="auth-options">
-                <p class="divider">OR</p>
-                <button onclick="enterGuestMode()" class="guest-btn">
-                    <i class="fas fa-user-secret"></i>
-                    Continue as Guest
-                </button>
-            </div>
-            <div class="form-footer">
-                <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
-            </div>
-        </form>
+    // Redirect to previous page or home
+    const returnUrl = new URLSearchParams(window.location.search).get('return');
+    window.location.href = returnUrl || 'index.html';
+}
 
-        <form id="registerForm" class="login-form" style="display: none;">
-            <h2>Create Account</h2>
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" name="fullname" required>
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <label>Confirm Password</label>
-                <input type="password" name="confirm_password" required>
-            </div>
-            <button type="submit" class="primary-btn">Register</button>
-            <div class="form-footer">
-                <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
-            </div>
-        </form>
-
-        <div id="verificationForm" class="login-form" style="display: none;">
-            <h2>Email Verification</h2>
-            <p>Please check your email for the verification code</p>
-            <div class="form-group">
-                <input type="text" 
-                       id="verificationCode" 
-                       placeholder="000000" 
-                       maxlength="6">
-            </div>
-            <div class="verification-buttons">
-                <button type="button" class="primary-btn verify-btn">Verify</button>
-                <button type="button" class="primary-btn resend-btn">Resend Code</button>
-            </div>
-            <div class="social-buttons">
-                <a href="https://discord.gg/Wj7mVvZnzT" target="_blank" class="discord-btn">
-                    <i class="fab fa-discord"></i> Join our Discord
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <script src="customer-login.js"></script>
-</body>
-</html> 
+// Update the checkLoginStatus function in script.js
+function checkLoginStatus() {
+    const isLoggedIn = localStorage.getItem('customerLoggedIn') === 'true';
+    const isGuest = localStorage.getItem('isGuestMode') === 'true';
+    const customerEmail = localStorage.getItem('customerEmail');
+    const userBtn = document.querySelector('.user-btn');
+    
+    if (isLoggedIn && userBtn) {
+        userBtn.innerHTML = `
+            <i class="fas fa-user${isGuest ? '-secret' : ''}" style="color: ${isGuest ? '#999' : '#00ff00'};"></i>
+            ${isGuest ? 'Guest User' : customerEmail}
+        `;
+        userBtn.href = '#';
+        
+        userBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Do you want to logout?')) {
+                localStorage.removeItem('customerLoggedIn');
+                localStorage.removeItem('customerEmail');
+                localStorage.removeItem('customerName');
+                localStorage.removeItem('isGuestMode');
+                window.location.href = 'customer-login.html';
+            }
+        });
+    }
+} 
