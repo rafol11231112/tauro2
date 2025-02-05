@@ -1,244 +1,227 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const showRegister = document.getElementById('showRegister');
-    const showLogin = document.getElementById('showLogin');
-
-    // Get stored users or initialize empty array
-    const getUsers = () => JSON.parse(localStorage.getItem('users') || '[]');
-    const saveUsers = (users) => localStorage.setItem('users', JSON.stringify(users));
-
-    // Toggle between login and register forms
-    showRegister?.addEventListener('click', (e) => {
-        e.preventDefault();
-        loginForm.style.display = 'none';
-        registerForm.style.display = 'block';
-    });
-
-    showLogin?.addEventListener('click', (e) => {
-        e.preventDefault();
-        registerForm.style.display = 'none';
-        loginForm.style.display = 'block';
-    });
-
-    // Handle login
-    loginForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = e.target.email.value.toLowerCase();
-        const password = e.target.password.value;
-
-        try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                localStorage.setItem('customerLoggedIn', 'true');
-                localStorage.setItem('customerEmail', email);
-                localStorage.setItem('customerName', data.user.fullname);
-                
-                // Check for saved product URL
-                const intendedUrl = localStorage.getItem('intendedProductUrl');
-                if (intendedUrl) {
-                    localStorage.removeItem('intendedProductUrl'); // Clear it
-                    window.location.href = intendedUrl;
-                } else {
-                    window.location.href = 'index.html';
-                }
-            } else {
-                alert(data.message || 'Login failed');
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            alert('Login failed. Please try again.');
-        }
-    });
-
-    // Handle registration
-    registerForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fullname = e.target.fullname.value;
-        const email = e.target.email.value.toLowerCase();
-        const password = e.target.password.value;
-        const confirmPassword = e.target.confirm_password.value;
-
-        if (password !== confirmPassword) {
-            alert('Passwords do not match');
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ fullname, email, password })
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                // Store user data
-                const users = getUsers();
-                users.push(data.user);
-                saveUsers(users);
-
-                // Auto login after registration
-                localStorage.setItem('customerLoggedIn', 'true');
-                localStorage.setItem('customerEmail', email);
-                localStorage.setItem('customerName', fullname);
-                
-                alert('Registration successful!');
-                window.location.href = 'index.html';
-            } else {
-                alert(data.message || 'Registration failed');
-            }
-        } catch (error) {
-            console.error('Registration error:', error);
-            alert('Registration failed. Please try again.');
-        }
-    });
-
-    // Update verification button handlers
-    const verifyBtn = document.querySelector('.verify-btn');
-    const resendBtn = document.querySelector('.resend-btn');
-
-    if (verifyBtn) {
-        verifyBtn.addEventListener('click', async () => {
-            const code = document.getElementById('verificationCode').value;
-            if (!code) {
-                alert('Please enter verification code');
-                return;
-            }
-
-            try {
-                const verifyResponse = await fetch('/api/auth/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email: pendingEmail, code })
-                });
-                
-                const verifyData = await verifyResponse.json();
-                if (verifyData.success) {
-                    localStorage.setItem('customerLoggedIn', 'true');
-                    localStorage.setItem('customerEmail', pendingEmail);
-                    localStorage.setItem('customerName', pendingFullname);
-                    alert('Registration successful!');
-                    window.location.href = returnUrl;
-                } else {
-                    alert(verifyData.message || 'Verification failed');
-                }
-            } catch (error) {
-                alert('Verification failed. Please try again.');
-            }
-        });
-    }
-
-    if (resendBtn) {
-        resendBtn.addEventListener('click', async () => {
-            try {
-                const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        email: pendingEmail, 
-                        fullname: pendingFullname,
-                        password: document.querySelector('#registerForm input[type="password"]').value
-                    })
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    alert('New verification code sent to your email');
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                alert('Failed to resend code. Please try again.');
-            }
-        });
-    }
-
-    // Add password requirements
-    const passwordInputs = document.querySelectorAll('input[type="password"]');
-    passwordInputs.forEach(input => {
-        input.pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
-        input.title = "Password must be at least 8 characters long and include uppercase, lowercase, and numbers";
-    });
-
-    // Add this to handle the code inputs
-    document.querySelectorAll('.code-input').forEach(input => {
-        input.addEventListener('keyup', (e) => {
-            if (e.key >= 0 && e.key <= 9) {
-                const next = input.nextElementSibling;
-                if (next && next.classList.contains('code-input')) {
-                    next.focus();
-                }
-            } else if (e.key === 'Backspace') {
-                const prev = input.previousElementSibling;
-                if (prev && prev.classList.contains('code-input')) {
-                    prev.focus();
-                }
-            }
-            
-            // Combine all inputs into hidden field
-            const code = Array.from(document.querySelectorAll('.code-input'))
-                .map(input => input.value)
-                .join('');
-            document.getElementById('verificationCode').value = code;
-        });
-    });
-});
-
-// Add this function to handle guest mode
-function enterGuestMode() {
-    localStorage.setItem('customerLoggedIn', 'true');
-    localStorage.setItem('customerEmail', 'guest@user.com');
-    localStorage.setItem('customerName', 'Guest User');
-    localStorage.setItem('isGuestMode', 'true');
-    
-    // Check for saved product URL
-    const intendedUrl = localStorage.getItem('intendedProductUrl');
-    if (intendedUrl) {
-        localStorage.removeItem('intendedProductUrl'); // Clear it
-        window.location.href = intendedUrl;
-    } else {
-        window.location.href = 'index.html';
-    }
-}
-
-// Update the checkLoginStatus function in script.js
-function checkLoginStatus() {
+    // Check login first
     const isLoggedIn = localStorage.getItem('customerLoggedIn') === 'true';
-    const isGuest = localStorage.getItem('isGuestMode') === 'true';
-    const customerEmail = localStorage.getItem('customerEmail');
-    const userBtn = document.querySelector('.user-btn');
-    
-    if (isLoggedIn && userBtn) {
-        userBtn.innerHTML = `
-            <i class="fas fa-user${isGuest ? '-secret' : ''}" style="color: ${isGuest ? '#999' : '#00ff00'};"></i>
-            ${isGuest ? 'Guest User' : customerEmail}
-        `;
-        userBtn.href = '#';
-        
-        userBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (confirm('Do you want to logout?')) {
-                localStorage.removeItem('customerLoggedIn');
-                localStorage.removeItem('customerEmail');
-                localStorage.removeItem('customerName');
-                localStorage.removeItem('isGuestMode');
-                window.location.href = 'customer-login.html';
-            }
-        });
+    if (!isLoggedIn) {
+        window.location.href = 'customer-login.html';
+        return;
     }
-} 
+
+    // Get product ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    // Get elements
+    const productTitle = document.getElementById('productTitle');
+    const productPrice = document.getElementById('productPrice');
+    const productDescription = document.getElementById('productDescription');
+    const stockSelect = document.getElementById('stockSelect');
+    const paymentOptions = document.getElementById('paymentOptions');
+    const buyButton = document.getElementById('buyButton');
+
+    // Get products from localStorage
+    const products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+    const product = products[productId];
+
+    if (product) {
+        // Display product details
+        productTitle.textContent = product.title;
+        productPrice.textContent = `$${product.price.toFixed(2)}`;
+        productDescription.textContent = product.description;
+
+        // Simplified stock selection and quantity
+        if (product.stock && product.stock.length > 0) {
+            stockSelect.innerHTML = `
+                <option value="">Select to Purchase</option>
+                <option value="0">${product.title} (${product.stock.length} in stock)</option>
+            `;
+            
+            // Add quantity selector after stock selection
+            const quantityDiv = document.createElement('div');
+            quantityDiv.className = 'quantity-selection';
+            quantityDiv.innerHTML = `
+                <label>Quantity:</label>
+                <div class="quantity-controls">
+                    <button type="button" class="quantity-btn minus">-</button>
+                    <input type="number" id="quantityInput" value="1" min="1" max="${product.stock.length}">
+                    <button type="button" class="quantity-btn plus">+</button>
+                </div>
+            `;
+            stockSelect.parentNode.appendChild(quantityDiv);
+            
+            // Handle quantity controls
+            const quantityInput = document.getElementById('quantityInput');
+            const minusBtn = quantityDiv.querySelector('.minus');
+            const plusBtn = quantityDiv.querySelector('.plus');
+            
+            minusBtn.onclick = () => {
+                if (quantityInput.value > 1) {
+                    quantityInput.value = parseInt(quantityInput.value) - 1;
+                }
+            };
+            
+            plusBtn.onclick = () => {
+                if (quantityInput.value < product.stock.length) {
+                    quantityInput.value = parseInt(quantityInput.value) + 1;
+                }
+            };
+            
+            quantityInput.onchange = () => {
+                let value = parseInt(quantityInput.value);
+                if (value < 1) value = 1;
+                if (value > product.stock.length) value = product.stock.length;
+                quantityInput.value = value;
+            };
+        } else {
+            stockSelect.innerHTML = `
+                <option value="">Product Unavailable</option>
+            `;
+            buyButton.disabled = true;
+        }
+
+        // Add payment methods
+        const paymentMethods = {
+            crypto: '<i class="fab fa-bitcoin"></i> Crypto',
+            paypal: '<i class="fab fa-paypal"></i> PayPal',
+            card: '<i class="fas fa-credit-card"></i> Card',
+            hood: '<i class="fas fa-mask"></i> Hood Pay'
+        };
+
+        product.payment_methods.forEach(method => {
+            const btn = document.createElement('button');
+            btn.className = 'payment-option';
+            btn.dataset.method = method;
+            btn.innerHTML = paymentMethods[method];
+            
+            btn.onclick = function() {
+                document.querySelectorAll('.payment-option').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                buyButton.disabled = !stockSelect.value;
+            };
+            
+            paymentOptions.appendChild(btn);
+        });
+
+        // Handle stock selection
+        stockSelect.onchange = function() {
+            const selectedPayment = document.querySelector('.payment-option.selected');
+            buyButton.disabled = !this.value || !selectedPayment;
+        };
+
+        // Handle buy button
+        buyButton.onclick = async function() {
+            const selectedPayment = document.querySelector('.payment-option.selected').dataset.method;
+            const selectedStockIndex = parseInt(stockSelect.value);
+            const quantity = parseInt(document.getElementById('quantityInput').value);
+            
+            // Get the selected stock items
+            const selectedStock = product.stock.slice(0, quantity);
+            
+            try {
+                if (selectedPayment === 'card') {
+                    const orderId = 'st_' + Math.random().toString(36).substring(2, 8);
+                    
+                    const response = await fetch('/api/create-stripe-session', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            product_name: `${product.title} x${quantity}`,
+                            price: product.price * quantity,
+                            order_id: orderId,
+                            success_url: window.location.origin + `/customer-panel.html?order_id=${orderId}&status=success`,
+                            cancel_url: window.location.href
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const session = await response.json();
+                    
+                    // Update the stock removal
+                    product.stock.splice(0, quantity);
+                    localStorage.setItem('storeProducts', JSON.stringify(products));
+                    
+                    // Update the pending order
+                    const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+                    pendingOrders.push({
+                        id: orderId,
+                        product: product.title,
+                        quantity: quantity,
+                        price: product.price * quantity,
+                        stock: selectedStock,
+                        timestamp: Date.now()
+                    });
+                    localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+
+                    // Redirect to Stripe
+                    const stripe = Stripe('pk_test_51OQofSHGgwl4L4aFBCBC75IHsfCXl4cV1yF3zFqpAdGJjprOTMVrgtawnBfSwzJOoePfshv1bdcnzFPyddaZl6bx00AHnVHXAJ');
+                    const { error } = await stripe.redirectToCheckout({
+                        sessionId: session.id
+                    });
+
+                    if (error) {
+                        throw error;
+                    }
+                } else if (selectedPayment === 'paypal') {
+                    const orderId = 'pp_' + Math.random().toString(36).substring(2, 8);
+                    
+                    // Save pending order first
+                    const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+                    pendingOrders.push({
+                        id: orderId,
+                        product: product.title,
+                        quantity: quantity,
+                        price: product.price * quantity,
+                        stock: selectedStock,
+                        timestamp: Date.now()
+                    });
+                    localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+
+                    // Create PayPal URL with proper parameters
+                    const paypalUrl = new URL('https://www.paypal.com/cgi-bin/webscr');
+                    paypalUrl.searchParams.append('cmd', '_xclick');
+                    paypalUrl.searchParams.append('business', 'YOUR_PAYPAL_EMAIL@gmail.com'); // Replace with your PayPal email
+                    paypalUrl.searchParams.append('item_name', encodeURIComponent(`${product.title} x${quantity}`));
+                    paypalUrl.searchParams.append('amount', (product.price * quantity).toFixed(2));
+                    paypalUrl.searchParams.append('currency_code', 'USD');
+                    paypalUrl.searchParams.append('return', encodeURIComponent(`${window.location.origin}/customer-panel.html?order_id=${orderId}&status=success`));
+                    paypalUrl.searchParams.append('cancel_return', encodeURIComponent(window.location.href));
+                    paypalUrl.searchParams.append('notify_url', encodeURIComponent(`${window.location.origin}/api/paypal-ipn`));
+                    paypalUrl.searchParams.append('custom', orderId);
+
+                    // Redirect to PayPal
+                    window.location.href = paypalUrl.toString();
+                } else if (selectedPayment === 'hood') {
+                    const orderId = 'm_' + Math.random().toString(36).substring(2, 8);
+                    
+                    // Update the stock removal
+                    product.stock.splice(0, quantity);
+                    localStorage.setItem('storeProducts', JSON.stringify(products));
+                    
+                    // Update the pending order
+                    const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+                    pendingOrders.push({
+                        id: orderId,
+                        product: product.title,
+                        quantity: quantity,
+                        price: product.price * quantity,
+                        stock: selectedStock,
+                        timestamp: Date.now()
+                    });
+                    localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+
+                    // Redirect to Hood Pay
+                    window.location.href = `https://pay.hood-pay.com/pay?amount=${product.price * quantity}&currency=USD&order_id=${orderId}&product_name=${encodeURIComponent(product.title)}&success_url=${encodeURIComponent(window.location.origin + '/customer-panel.html')}&merchant_id=23750`;
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Payment failed: ' + error.message);
+            }
+        };
+    } else {
+        document.body.innerHTML = '<div class="error">Product not found</div>';
+    }
+});
