@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (addProductForm) {
         addProductForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Form submitted');
 
             const formData = new FormData(addProductForm);
             const newProduct = {
@@ -34,6 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 category: formData.get('category') || 'software'
             };
 
+            console.log('New product:', newProduct);
+
             try {
                 const response = await fetch('/api/products', {
                     method: 'POST',
@@ -42,6 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify(newProduct)
                 });
+
+                console.log('Response:', response);
 
                 if (!response.ok) {
                     throw new Error('Failed to add product');
@@ -65,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/api/products');
             const products = await response.json();
+            console.log('Loaded products:', products);
 
             productsContainer.innerHTML = products.map((product, index) => `
                 <div class="product-item">
@@ -105,13 +111,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Global functions for edit and delete
 window.editProduct = function(index) {
-    // Implement edit functionality
     alert('Edit functionality coming soon!');
 };
 
 window.deleteProduct = function(index) {
     if (confirm('Are you sure you want to delete this product?')) {
-        // Implement delete functionality
         alert('Delete functionality coming soon!');
     }
 }; 
