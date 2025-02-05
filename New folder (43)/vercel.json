@@ -9,18 +9,6 @@
   "routes": [
     { "src": "/api/paypal-ipn", "dest": "/api/paypal-ipn.py" },
     { "src": "/api/(.*)", "dest": "/api/index.py" },
-    { "src": "/(.*)", "dest": "/$1" },
-    {
-      "src": "/admin.*",
-      "headers": {
-        "Cache-Control": "no-store, no-cache, must-revalidate"
-      }
-    },
-    {
-      "src": "/api/admin/.*",
-      "headers": {
-        "Cache-Control": "no-store, no-cache, must-revalidate"
-      }
-    }
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 } 
