@@ -1,28 +1,53 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Check login first
+    // Check login first - but don't redirect immediately
     const isLoggedIn = localStorage.getItem('customerLoggedIn') === 'true';
-    if (!isLoggedIn) {
-        window.location.href = 'customer-login.html';
-        return;
-    }
+    const buyButton = document.getElementById('buyButton');
 
     // Get product ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
 
     // Get elements
-    const productTitle = document.getElementById('productTitle');
-    const productPrice = document.getElementById('productPrice');
-    const productDescription = document.getElementById('productDescription');
-    const stockSelect = document.getElementById('stockSelect');
-    const paymentOptions = document.getElementById('paymentOptions');
-    const buyButton = document.getElementById('buyButton');
+    const productTitle = document.querySelector('.product-title');
+    const productPrice = document.querySelector('.product-price');
+    const productDescription = document.querySelector('.product-description');
+    const stockCount = document.querySelector('.stock-count');
+    const quantityInput = document.getElementById('quantity');
+    const paymentMethods = document.querySelector('.payment-methods');
 
     // Get products from localStorage
     const products = JSON.parse(localStorage.getItem('storeProducts')) || [];
     const product = products[productId];
 
     if (product) {
+        // Update buy button based on login status
+        buyButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            if (!isLoggedIn) {
+                // Save current URL to redirect back after login
+                const currentUrl = window.location.href;
+                window.location.href = `customer-login.html?return=${encodeURIComponent(currentUrl)}`;
+                return;
+            }
+
+            // Rest of your existing buy button code...
+            const quantity = parseInt(quantityInput.value);
+            const selectedPayment = document.querySelector('input[name="payment"]:checked')?.value;
+            
+            if (!selectedPayment) {
+                alert('Please select a payment method');
+                return;
+            }
+
+            // Your existing payment processing code...
+        });
+
+        // Update button text based on login status
+        if (!isLoggedIn) {
+            buyButton.innerHTML = '<i class="fas fa-lock"></i> Login to Purchase';
+        }
+
         // Display product details
         productTitle.textContent = product.title;
         productPrice.textContent = `$${product.price.toFixed(2)}`;
@@ -30,10 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Simplified stock selection and quantity
         if (product.stock && product.stock.length > 0) {
-            stockSelect.innerHTML = `
-                <option value="">Select to Purchase</option>
-                <option value="0">${product.title} (${product.stock.length} in stock)</option>
-            `;
+            stockCount.textContent = `${product.title} (${product.stock.length} in stock)`;
             
             // Add quantity selector after stock selection
             const quantityDiv = document.createElement('div');
@@ -46,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button type="button" class="quantity-btn plus">+</button>
                 </div>
             `;
-            stockSelect.parentNode.appendChild(quantityDiv);
+            stockCount.parentNode.appendChild(quantityDiv);
             
             // Handle quantity controls
             const quantityInput = document.getElementById('quantityInput');
@@ -72,9 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 quantityInput.value = value;
             };
         } else {
-            stockSelect.innerHTML = `
-                <option value="">Product Unavailable</option>
-            `;
+            stockCount.textContent = 'Product Unavailable';
             buyButton.disabled = true;
         }
 
@@ -95,14 +115,14 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.onclick = function() {
                 document.querySelectorAll('.payment-option').forEach(b => b.classList.remove('selected'));
                 this.classList.add('selected');
-                buyButton.disabled = !stockSelect.value;
+                buyButton.disabled = !quantityInput.value;
             };
             
-            paymentOptions.appendChild(btn);
+            paymentMethods.appendChild(btn);
         });
 
         // Handle stock selection
-        stockSelect.onchange = function() {
+        quantityInput.onchange = function() {
             const selectedPayment = document.querySelector('.payment-option.selected');
             buyButton.disabled = !this.value || !selectedPayment;
         };
@@ -110,8 +130,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Handle buy button
         buyButton.onclick = async function() {
             const selectedPayment = document.querySelector('.payment-option.selected').dataset.method;
-            const selectedStockIndex = parseInt(stockSelect.value);
-            const quantity = parseInt(document.getElementById('quantityInput').value);
+            const selectedStockIndex = parseInt(quantityInput.value);
+            const quantity = parseInt(quantityInput.value);
             
             // Get the selected stock items
             const selectedStock = product.stock.slice(0, quantity);
