@@ -2,8 +2,10 @@ from flask import Flask, request, jsonify
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 @app.route('/api/send-email', methods=['POST'])
 def send_email():
@@ -15,44 +17,58 @@ def send_email():
         SMTP_SERVER = "smtp.gmail.com"
         SMTP_PORT = 587
         SENDER_EMAIL = "refaellugasi10@gmail.com"
-        SENDER_PASSWORD = "xhpy nded imfp ygtc"
+        # Use an App Password instead of regular password
+        SENDER_PASSWORD = "myrj uyuw kpfu bvdo"  # Replace with your new app password
 
         # Create message
         msg = MIMEMultipart()
-        msg['From'] = SENDER_EMAIL
+        msg['From'] = f"Your Store <{SENDER_EMAIL}>"
         msg['To'] = data['customerEmail']
-        msg['Subject'] = f"Your Purchase: {data['product']}"
+        msg['Subject'] = f"Your Purchase: {data['product']} - Order #{data['orderId']}"
 
         body = f"""
-        Thank you for your purchase!
+Thank you for your purchase!
 
-        Order Details:
-        - Product: {data['product']}
-        - Order ID: {data['orderId']}
+Order Details:
+- Product: {data['product']}
+- Order ID: #{data['orderId']}
 
-        Your Item:
-        {data['item']}
+Your Item(s):
+{data['item']}
 
-        Keep this email safe as it contains your purchased item.
+Keep this email safe as it contains your purchased item(s).
 
-        Best regards,
-        Your Store Team
+Best regards,
+Your Store Team
         """
 
         msg.attach(MIMEText(body, 'plain'))
 
-        # Send email
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SENDER_EMAIL, SENDER_PASSWORD)
-            server.send_message(msg)
+        try:
+            # Send email
+            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+                print("Connecting to SMTP server...")
+                server.starttls()
+                print("Logging in...")
+                server.login(SENDER_EMAIL, SENDER_PASSWORD)
+                print("Sending email...")
+                server.send_message(msg)
+                print("Email sent successfully!")
+        except Exception as smtp_error:
+            print("SMTP Error:", str(smtp_error))
+            raise smtp_error
 
-        print("Email sent successfully!")
-        return jsonify({"success": True})
+        return jsonify({
+            "success": True,
+            "message": "Email sent successfully"
+        })
 
     except Exception as e:
         print("Error sending email:", str(e))
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 # For local testing
 if __name__ == '__main__':
