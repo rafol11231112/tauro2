@@ -189,4 +189,43 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('verificationCode').value = code;
         });
     });
-}); 
+});
+
+// Add this function to handle guest mode
+function enterGuestMode() {
+    localStorage.setItem('customerLoggedIn', 'true');
+    localStorage.setItem('customerEmail', 'guest@user.com');
+    localStorage.setItem('customerName', 'Guest User');
+    localStorage.setItem('isGuestMode', 'true');
+    
+    // Redirect to previous page or home
+    const returnUrl = new URLSearchParams(window.location.search).get('return');
+    window.location.href = returnUrl || 'index.html';
+}
+
+// Update the checkLoginStatus function in script.js
+function checkLoginStatus() {
+    const isLoggedIn = localStorage.getItem('customerLoggedIn') === 'true';
+    const isGuest = localStorage.getItem('isGuestMode') === 'true';
+    const customerEmail = localStorage.getItem('customerEmail');
+    const userBtn = document.querySelector('.user-btn');
+    
+    if (isLoggedIn && userBtn) {
+        userBtn.innerHTML = `
+            <i class="fas fa-user${isGuest ? '-secret' : ''}" style="color: ${isGuest ? '#999' : '#00ff00'};"></i>
+            ${isGuest ? 'Guest User' : customerEmail}
+        `;
+        userBtn.href = '#';
+        
+        userBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Do you want to logout?')) {
+                localStorage.removeItem('customerLoggedIn');
+                localStorage.removeItem('customerEmail');
+                localStorage.removeItem('customerName');
+                localStorage.removeItem('isGuestMode');
+                window.location.href = 'customer-login.html';
+            }
+        });
+    }
+} 
