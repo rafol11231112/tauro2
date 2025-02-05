@@ -1526,3 +1526,54 @@ th {
 .buy-btn i {
     font-size: 1.2rem;
 }
+
+.quantity-selection {
+    margin-top: 1rem;
+}
+
+.quantity-selection label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.quantity-btn {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.quantity-btn:hover {
+    background: rgba(255, 0, 0, 0.2);
+}
+
+#quantityInput {
+    width: 60px;
+    padding: 0.5rem;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: white;
+    font-size: 1rem;
+}
+
+#quantityInput::-webkit-inner-spin-button,
+#quantityInput::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
