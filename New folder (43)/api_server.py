@@ -9,12 +9,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import random
 import string
-import jwt
-from functools import wraps
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-app.config['SECRET_KEY'] = 'your-secret-key-here'  # Change this to a secure secret key
 
 # Stripe configuration
 stripe.api_key = 'sk_test_51OQofSHGgwl4L4aF3XjdpXVc8OpHOQIobAsgVwU8ZwGWe2AqbIc8KymV6rf4VgqQ5URavCnYCNDIgHUH1JMLJ98G00cVHukVAU'
@@ -280,69 +277,6 @@ def create_checkout_session():
     except Exception as e:
         print("Stripe error:", str(e))
         return jsonify({'error': str(e)}), 500
-
-# Admin authentication middleware
-def require_admin(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth_token = request.headers.get('Authorization')
-        if not auth_token:
-            return jsonify({'message': 'No token provided'}), 401
-        
-        try:
-            # Remove 'Bearer ' from token
-            if auth_token.startswith('Bearer '):
-                auth_token = auth_token[7:]
-            
-            # Verify token
-            data = jwt.decode(auth_token, app.config['SECRET_KEY'], algorithms=["HS256"])
-            if not data.get('is_admin'):
-                return jsonify({'message': 'Not authorized'}), 403
-                
-        except jwt.ExpiredSignatureError:
-            return jsonify({'message': 'Token expired'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'message': 'Invalid token'}), 401
-            
-        return f(*args, **kwargs)
-    return decorated
-
-# Admin login endpoint
-@app.route('/api/admin/login', methods=['POST'])
-def admin_login():
-    data = request.json
-    username = data.get('username')
-    password = data.get('password')
-    
-    # Replace with your actual admin credentials check
-    if username == "admin" and password == "your-secure-password":
-        token = jwt.encode({
-            'username': username,
-            'is_admin': True
-        }, app.config['SECRET_KEY'], algorithm="HS256")
-        
-        return jsonify({
-            'success': True,
-            'token': token
-        })
-    
-    return jsonify({
-        'success': False,
-        'message': 'Invalid credentials'
-    }), 401
-
-# Protected admin routes
-@app.route('/api/admin/products', methods=['GET'])
-@require_admin
-def get_admin_products():
-    # Your product handling code here
-    return jsonify({'products': []})
-
-@app.route('/api/admin/products', methods=['POST'])
-@require_admin
-def create_product():
-    # Your product creation code here
-    return jsonify({'success': True})
 
 if __name__ == '__main__':
     try:
