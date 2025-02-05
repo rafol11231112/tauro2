@@ -1409,6 +1409,12 @@ th {
     margin: 0;
 }
 
+.product-header .price {
+    font-size: 2rem;
+    color: #ff0000;
+    font-weight: bold;
+}
+
 .product-description {
     color: rgba(255, 255, 255, 0.7);
     margin-bottom: 2rem;
@@ -1419,6 +1425,12 @@ th {
     margin-bottom: 2rem;
 }
 
+.stock-selection label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
 .stock-dropdown {
     width: 100%;
     padding: 0.8rem;
@@ -1426,11 +1438,23 @@ th {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 4px;
     color: white;
-    margin-top: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: center;
+}
+
+.stock-dropdown option {
+    background: #1a0808;
+    color: white;
 }
 
 .payment-methods {
     margin-bottom: 2rem;
+}
+
+.payment-methods h3 {
+    color: #fff;
+    margin-bottom: 1rem;
 }
 
 .payment-options {
@@ -1479,9 +1503,13 @@ th {
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 5px 15px rgba(255, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
-.buy-btn:hover {
+.buy-btn:hover:not(:disabled) {
     background: linear-gradient(45deg, #ff3333, #ff0000);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 0, 0, 0.3);
@@ -1492,405 +1520,9 @@ th {
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+    opacity: 0.7;
 }
 
-/* Customer Panel Styles */
-.customer-panel {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 2rem;
-}
-
-.customer-panel h1 {
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.purchases-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-.purchase-card {
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 12px;
-    padding: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.purchase-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.purchase-title {
+.buy-btn i {
     font-size: 1.2rem;
-    margin: 0;
 }
-
-.purchase-date {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.9rem;
-}
-
-.purchase-details {
-    margin: 1rem 0;
-    padding: 1rem;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 8px;
-    font-family: monospace;
-    word-break: break-all;
-}
-
-.delivery-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    padding: 0.5rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-.delivery-status.delivered {
-    background: rgba(0, 255, 0, 0.1);
-    color: #00ff00;
-}
-
-.delivery-status.pending {
-    background: rgba(255, 166, 0, 0.1);
-    color: orange;
-}
-
-.purchase-pending {
-    margin: 1rem 0;
-    padding: 1rem;
-    background: rgba(255, 166, 0, 0.1);
-    border-radius: 8px;
-    color: orange;
-    text-align: center;
-}
-
-.purchase-details {
-    margin: 1rem 0;
-    padding: 1rem;
-    background: rgba(0, 255, 0, 0.1);
-    border-radius: 8px;
-    font-family: monospace;
-    word-break: break-all;
-    color: #00ff00;
-}
-
-/* Hood Pay specific styles */
-.payment-option[data-method="hood"] {
-    background: linear-gradient(45deg, #1a1a1a, #333);
-    border: 1px solid #444;
-}
-
-.payment-option[data-method="hood"]:hover {
-    background: linear-gradient(45deg, #222, #444);
-}
-
-.payment-option[data-method="hood"].selected {
-    background: linear-gradient(45deg, #000, #222);
-    border-color: #666;
-    box-shadow: 0 0 10px rgba(255,255,255,0.1);
-}
-
-.payment-option[data-method="hood"] i {
-    color: #888;
-}
-
-.hood-pay-instructions {
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid #444;
-    padding: 1rem;
-    margin: 1rem 0;
-    border-radius: 4px;
-    font-family: monospace;
-    white-space: pre-wrap;
-}
-
-/* Hood Pay Modal Styles */
-.hood-pay-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.hood-pay-content {
-    background: #1a1a1a;
-    padding: 2rem;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
-    position: relative;
-    border: 1px solid #333;
-}
-
-.hood-pay-content h2 {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: #fff;
-}
-
-.crypto-options {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.crypto-option {
-    background: #000;
-    border: 1px solid #333;
-    padding: 1rem;
-    border-radius: 8px;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
-}
-
-.crypto-option:hover {
-    background: #111;
-    border-color: #444;
-}
-
-.payment-details {
-    text-align: center;
-}
-
-.qr-placeholder {
-    width: 200px;
-    height: 200px;
-    background: #000;
-    margin: 1rem auto;
-    border-radius: 8px;
-}
-
-.wallet-address {
-    display: flex;
-    gap: 0.5rem;
-    margin: 1rem 0;
-}
-
-.wallet-address input {
-    flex: 1;
-    background: #000;
-    border: 1px solid #333;
-    padding: 0.5rem;
-    border-radius: 4px;
-    color: #fff;
-    font-family: monospace;
-}
-
-.copy-btn {
-    background: #333;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    color: #fff;
-    cursor: pointer;
-}
-
-.payment-info {
-    margin: 1rem 0;
-    color: #fff;
-}
-
-.timer {
-    font-size: 2rem;
-    font-family: monospace;
-    color: #ff0000;
-    margin: 1rem 0;
-}
-
-.check-payment-btn {
-    background: #ff0000;
-    color: #fff;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1.1rem;
-    margin-top: 1rem;
-}
-
-.close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-/* Reset all previous verification form styles */
-#verificationForm {
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 8px;
-    padding: 40px;
-    text-align: center;
-    max-width: 400px;
-    margin: 0 auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-#verificationForm h2 {
-    color: #ff0000;
-    font-size: 24px;
-    margin-bottom: 20px;
-}
-
-#verificationForm p {
-    color: white;
-    margin-bottom: 30px;
-    font-size: 14px;
-}
-
-#verificationForm input {
-    width: 100%;
-    background: #000;
-    border: 1px solid #333;
-    border-radius: 4px;
-    color: #fff;
-    padding: 15px;
-    font-size: 18px;
-    text-align: center;
-    letter-spacing: 8px;
-    margin-bottom: 20px;
-}
-
-#verificationForm input:focus {
-    outline: none;
-    border-color: #000000;
-}
-
-.verification-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin: 20px 0;
-}
-
-.verification-buttons button {
-    padding: 10px 30px;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.verify-btn {
-    background: #ff0000 !important;
-}
-
-.resend-btn {
-    background: #000 !important;
-}
-
-.social-buttons {
-    margin-top: 30px;
-    text-align: center;
-    border-top: 1px solid #333;
-    padding-top: 20px;
-}
-
-.discord-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: #5865F2;
-    color: white;
-    padding: 12px 30px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    width: 100%;
-    max-width: 250px;
-}
-
-.discord-btn:hover {
-    background: #4752c4;
-    transform: translateY(-2px);
-}
-
-.discord-btn i {
-    font-size: 20px;
-}
-
-/* Update the verification code input style */
-#verificationCode {
-    width: 100%;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid #333;
-    border-radius: 4px;
-    color: #fff;
-    font-size: 16px;
-    text-align: left;
-    padding-left: 15px;
-    margin: 20px 0;
-}
-
-#verificationCode:focus {
-    outline: none;
-    border-color: #333;
-    background: rgba(0, 0, 0, 0.4);
-}
-
-footer {
-    background: rgba(0, 0, 0, 0.8);
-    padding: 40px;
-    margin-top: 40px;
-    display: flex;
-    justify-content: space-around;
-}
-
-.footer-section h3 {
-    color: #fff;
-    margin-bottom: 20px;
-    font-size: 18px;
-}
-
-.footer-section ul {
-    list-style: none;
-}
-
-.footer-section ul li {
-    margin: 10px 0;
-}
-
-.footer-section ul li a {
-    color: #fff;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.social-link:hover {
-    color: #ff0000;
-}
-
-.social-link i {
-    font-size: 20px;
-} 
