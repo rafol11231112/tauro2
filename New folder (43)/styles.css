@@ -1577,3 +1577,196 @@ th {
     -webkit-appearance: none;
     margin: 0;
 }
+
+/* Purchase page specific styles */
+.customer-panel {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.customer-panel h1 {
+    color: #fff;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+}
+
+.purchases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.purchase-card {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.purchase-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(255, 0, 0, 0.1);
+    border-color: rgba(255, 0, 0, 0.3);
+}
+
+.purchase-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 0, 0, 0.1);
+    padding-bottom: 1rem;
+}
+
+.purchase-title {
+    color: #ff0000;
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: bold;
+}
+
+.purchase-date {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.purchase-info {
+    margin-bottom: 1.5rem;
+}
+
+.purchase-info p {
+    color: #fff;
+    margin: 0.5rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.purchase-info p span {
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.purchase-details {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    font-family: monospace;
+    color: #00ff00;
+    word-break: break-all;
+}
+
+.purchase-pending {
+    background: rgba(255, 165, 0, 0.1);
+    border: 1px solid rgba(255, 165, 0, 0.2);
+    color: orange;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.delivery-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    border-radius: 25px;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.delivery-status.delivered {
+    background: rgba(0, 255, 0, 0.1);
+    color: #00ff00;
+    border: 1px solid rgba(0, 255, 0, 0.2);
+}
+
+.delivery-status.pending {
+    background: rgba(255, 165, 0, 0.1);
+    color: orange;
+    border: 1px solid rgba(255, 165, 0, 0.2);
+}
+
+.delivery-status i {
+    font-size: 1.1rem;
+}
+
+/* Empty state styling */
+.empty-purchases {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 0, 0, 0.1);
+}
+
+.empty-purchases h3 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.empty-purchases p {
+    color: #666;
+}
+
+.empty-purchases a {
+    color: #ff0000;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.empty-purchases a:hover {
+    text-decoration: underline;
+}
+
+/* Quantity badge */
+.quantity-badge {
+    background: #ff0000;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+}
+
+/* Price styling */
+.price-tag {
+    color: #ff0000;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Order ID styling */
+.order-id {
+    font-family: monospace;
+    background: rgba(255, 0, 0, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    color: #ff0000;
+}
+
+/* Payment method badge */
+.payment-badge {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff0000;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.payment-badge i {
+    font-size: 1rem;
+}
