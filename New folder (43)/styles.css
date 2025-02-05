@@ -1770,3 +1770,132 @@ th {
 .payment-badge i {
     font-size: 1rem;
 }
+
+/* Contact Section */
+.contact-section {
+    padding: 4rem 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    margin: 2rem 0;
+}
+
+.contact-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.contact-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.contact-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.contact-item:hover {
+    transform: translateY(-5px);
+}
+
+.contact-item i {
+    font-size: 2.5rem;
+    color: #ff0000;
+    margin-bottom: 1rem;
+}
+
+.contact-item h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.contact-item p {
+    color: #999;
+    margin-bottom: 1rem;
+}
+
+.contact-link {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: #ff0000;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.contact-link:hover {
+    background: #cc0000;
+}
+
+/* Reviews Section */
+.reviews-section {
+    padding: 4rem 2rem;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 2rem auto;
+}
+
+.review-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 10px;
+    position: relative;
+}
+
+.review-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.review-header i {
+    font-size: 2.5rem;
+    color: #666;
+    margin-right: 1rem;
+}
+
+.review-info h3 {
+    color: #fff;
+    margin-bottom: 0.25rem;
+}
+
+.stars {
+    color: #ff0000;
+}
+
+.review-text {
+    color: #ccc;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.review-date {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.verified-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: #00ff00;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.verified-badge i {
+    font-size: 1rem;
+}
