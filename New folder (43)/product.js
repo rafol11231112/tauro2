@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Create PayPal URL with proper parameters
                     const paypalUrl = new URL('https://www.paypal.com/cgi-bin/webscr');
                     paypalUrl.searchParams.append('cmd', '_xclick');
-                    paypalUrl.searchParams.append('business', 'YOUR_PAYPAL_EMAIL@gmail.com'); // Replace with your PayPal email
+                    paypalUrl.searchParams.append('business', 'eyalcodes2007@gmail.com'); // Replace with your PayPal email
                     paypalUrl.searchParams.append('item_name', encodeURIComponent(`${product.title} x${quantity}`));
                     paypalUrl.searchParams.append('amount', (product.price * quantity).toFixed(2));
                     paypalUrl.searchParams.append('currency_code', 'USD');
