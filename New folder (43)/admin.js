@@ -190,4 +190,31 @@ document.addEventListener('DOMContentLoaded', function() {
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
     `;
+
+    // Add this to your API calls in admin.js
+    async function fetchAdminAPI(endpoint, options = {}) {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            window.location.href = 'admin-login.html';
+            return;
+        }
+
+        const response = await fetch(endpoint, {
+            ...options,
+            headers: {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.status === 401) {
+            localStorage.removeItem('adminLoggedIn');
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+            return;
+        }
+
+        return response;
+    }
 }); 
