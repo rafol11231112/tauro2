@@ -41,7 +41,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('customerLoggedIn', 'true');
                 localStorage.setItem('customerEmail', email);
                 localStorage.setItem('customerName', data.user.fullname);
-                window.location.href = 'index.html';
+                
+                // Check for return URL
+                const returnUrl = new URLSearchParams(window.location.search).get('return');
+                if (returnUrl) {
+                    window.location.href = returnUrl;
+                } else {
+                    window.location.href = 'index.html';
+                }
             } else {
                 alert(data.message || 'Login failed');
             }
@@ -198,9 +205,13 @@ function enterGuestMode() {
     localStorage.setItem('customerName', 'Guest User');
     localStorage.setItem('isGuestMode', 'true');
     
-    // Redirect to previous page or home
+    // Check for return URL
     const returnUrl = new URLSearchParams(window.location.search).get('return');
-    window.location.href = returnUrl || 'index.html';
+    if (returnUrl) {
+        window.location.href = returnUrl;
+    } else {
+        window.location.href = 'index.html';
+    }
 }
 
 // Update the checkLoginStatus function in script.js
