@@ -86,7 +86,7 @@ async function verifyPayment(orderId) {
                     // Send email to customer
                     const customerEmail = localStorage.getItem('customerEmail');
                     try {
-                        const emailResponse = await fetch('http://localhost:8080/send-purchase-email', {
+                        const emailResponse = await fetch('/api/send-email', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ async function verifyPayment(orderId) {
                         });
 
                         if (!emailResponse.ok) {
-                            console.error('Failed to send email');
+                            console.error('Failed to send email:', await emailResponse.text());
                         }
                     } catch (emailError) {
                         console.error('Error sending email:', emailError);
