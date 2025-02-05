@@ -259,4 +259,98 @@ function updateLoginLinks() {
 document.addEventListener('DOMContentLoaded', function() {
     updateLoginLinks();
     // ... rest of your code
+});
+
+// Add these functions to script.js
+document.addEventListener('DOMContentLoaded', function() {
+    // Navigation links
+    const navLinks = {
+        'Home': '/',
+        'Products': '/#products',
+        'Contact': '/#contact',
+        'Reviews': '/#reviews'
+    };
+
+    // Add click handlers for nav links
+    Object.entries(navLinks).forEach(([text, href]) => {
+        const link = document.querySelector(`.nav-links a[href*="${href}"]`);
+        if (link) {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (href === '/') {
+                    window.location.href = 'index.html';
+                } else {
+                    // If we're already on index.html, just scroll
+                    if (window.location.pathname.includes('index.html')) {
+                        const targetId = href.replace('#', '');
+                        const target = document.getElementById(targetId);
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    } else {
+                        window.location.href = 'index.html' + href;
+                    }
+                }
+            });
+        }
+    });
+
+    // Cart button
+    const cartBtn = document.querySelector('.cart-btn');
+    if (cartBtn) {
+        cartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            cartBtn.querySelector('span').textContent = cart.length;
+            // You can add cart modal/page logic here
+        });
+    }
+
+    // User button
+    const userBtn = document.querySelector('.user-btn');
+    if (userBtn) {
+        userBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isLoggedIn = localStorage.getItem('customerLoggedIn') === 'true';
+            if (isLoggedIn) {
+                if (confirm('Do you want to logout?')) {
+                    localStorage.removeItem('customerLoggedIn');
+                    localStorage.removeItem('customerEmail');
+                    window.location.href = 'customer-login.html';
+                }
+            } else {
+                window.location.href = 'customer-login.html';
+            }
+        });
+    }
+
+    // Admin Panel button
+    const adminBtn = document.querySelector('.admin-btn');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isAdminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            if (isAdminLoggedIn) {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'admin-login.html';
+            }
+        });
+    }
+
+    // Update email display
+    const emailText = document.querySelector('.email-text');
+    if (emailText) {
+        const customerEmail = localStorage.getItem('customerEmail');
+        if (customerEmail) {
+            emailText.textContent = customerEmail;
+        }
+    }
+
+    // Update cart count
+    const cartCount = document.querySelector('.cart-btn span');
+    if (cartCount) {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        cartCount.textContent = cart.length;
+    }
 }); 
