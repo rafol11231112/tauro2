@@ -4,15 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Your Store</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin-styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <script>
+        // Immediate check before showing any content
+        if (localStorage.getItem('adminLoggedIn') !== 'true') {
+            window.location.href = 'admin-login.html';
+        }
+    </script>
     <div class="background-dots"></div>
     
     <div class="admin-container">
         <div class="admin-sidebar">
-            <h1 class="admin-title">Admin Panel</h1>
+            <div class="sidebar-header">
+                <span class="brand-text">Your</span>
+                <span class="brand-text-pro">.store</span>
+                <span class="pro-badge">PRO</span>
+            </div>
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active">
                     <i class="fas fa-box"></i>
@@ -27,21 +37,24 @@
                     Settings
                 </a>
             </nav>
+            <button onclick="logout()" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </div>
 
         <div class="admin-content">
             <div class="top-bar">
-                <h1>Product Management</h1>
+                <h1>Products</h1>
                 <button id="addProductBtn" class="primary-btn">
-                    <i class="fas fa-plus"></i> Add New Product
+                    <i class="fas fa-plus"></i> Add Product
                 </button>
             </div>
 
-            <div class="product-form-container" id="productForm" style="display: none;">
+            <div id="productForm" class="product-form" style="display: none;">
                 <form id="addProductForm">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label>Product Title</label>
+                            <label>Title</label>
                             <input type="text" name="title" required>
                         </div>
                         <div class="form-group">
@@ -50,28 +63,7 @@
                         </div>
                         <div class="form-group full-width">
                             <label>Description</label>
-                            <textarea name="description" rows="4" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Payment Methods</label>
-                            <div class="checkbox-group">
-                                <label>
-                                    <input type="checkbox" name="payment_methods" value="crypto">
-                                    Cryptocurrency
-                                </label>
-                                <label>
-                                    <input type="checkbox" name="payment_methods" value="paypal">
-                                    PayPal
-                                </label>
-                                <label>
-                                    <input type="checkbox" name="payment_methods" value="card">
-                                    Credit Card
-                                </label>
-                                <label>
-                                    <input type="checkbox" name="payment_methods" value="hood">
-                                    Hood Pay
-                                </label>
-                            </div>
+                            <textarea name="description" required></textarea>
                         </div>
                         <div class="form-group">
                             <label>Category</label>
@@ -91,16 +83,11 @@
             </div>
 
             <div class="products-list" id="productsList">
-                <!-- Products will be listed here -->
+                <!-- Products will be loaded here -->
             </div>
         </div>
     </div>
 
     <script src="admin.js"></script>
-    <script>
-        if (localStorage.getItem('adminLoggedIn') !== 'true') {
-            window.location.href = 'admin-login.html';
-        }
-    </script>
 </body>
 </html> 
