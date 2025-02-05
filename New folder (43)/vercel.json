@@ -7,7 +7,8 @@
     { "src": "api/*.py", "use": "@vercel/python" }
   ],
   "routes": [
-    { "src": "/api/paypal-ipn", "dest": "/api/paypal-ipn.py" },
+    { "src": "/api/cryptomus", "dest": "/api/cryptomus.py" },
+    { "src": "/api/cryptomus-webhook", "dest": "/api/cryptomus-webhook.py" },
     { "src": "/api/(.*)", "dest": "/api/index.py" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
