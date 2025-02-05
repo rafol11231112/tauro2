@@ -28,13 +28,11 @@ document.addEventListener('DOMContentLoaded', function() {
         productPrice.textContent = `$${product.price.toFixed(2)}`;
         productDescription.textContent = product.description;
 
-        // Display stock items
+        // Simplified stock selection
         if (product.stock && product.stock.length > 0) {
             stockSelect.innerHTML = `
                 <option value="">Select an item</option>
-                ${product.stock.map((item, index) => `
-                    <option value="${index}">${item}</option>
-                `).join('')}
+                <option value="0">Available</option>
             `;
         } else {
             stockSelect.innerHTML = '<option value="">Out of Stock</option>';
