@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Simplified stock selection
         if (product.stock && product.stock.length > 0) {
             stockSelect.innerHTML = `
-                <option value="">Select an item</option>
+                <option value="">Select to Purchase</option>
                 <option value="0">Available</option>
             `;
         } else {
@@ -73,11 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedPayment = document.querySelector('.payment-option.selected').dataset.method;
             const selectedStockIndex = parseInt(stockSelect.value);
             const selectedStock = product.stock[selectedStockIndex];
-
-            if (!selectedStock) {
-                alert('Please select an item first');
-                return;
-            }
 
             try {
                 if (selectedPayment === 'card') {
@@ -176,4 +171,4 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         document.body.innerHTML = '<div class="error">Product not found</div>';
     }
-}); 
+});
