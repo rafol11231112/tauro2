@@ -28,14 +28,53 @@ document.addEventListener('DOMContentLoaded', function() {
         productPrice.textContent = `$${product.price.toFixed(2)}`;
         productDescription.textContent = product.description;
 
-        // Simplified stock selection
+        // Simplified stock selection and quantity
         if (product.stock && product.stock.length > 0) {
             stockSelect.innerHTML = `
                 <option value="">Select to Purchase</option>
-                <option value="0">Available</option>
+                <option value="0">${product.title} (${product.stock.length} in stock)</option>
             `;
+            
+            // Add quantity selector after stock selection
+            const quantityDiv = document.createElement('div');
+            quantityDiv.className = 'quantity-selection';
+            quantityDiv.innerHTML = `
+                <label>Quantity:</label>
+                <div class="quantity-controls">
+                    <button type="button" class="quantity-btn minus">-</button>
+                    <input type="number" id="quantityInput" value="1" min="1" max="${product.stock.length}">
+                    <button type="button" class="quantity-btn plus">+</button>
+                </div>
+            `;
+            stockSelect.parentNode.appendChild(quantityDiv);
+            
+            // Handle quantity controls
+            const quantityInput = document.getElementById('quantityInput');
+            const minusBtn = quantityDiv.querySelector('.minus');
+            const plusBtn = quantityDiv.querySelector('.plus');
+            
+            minusBtn.onclick = () => {
+                if (quantityInput.value > 1) {
+                    quantityInput.value = parseInt(quantityInput.value) - 1;
+                }
+            };
+            
+            plusBtn.onclick = () => {
+                if (quantityInput.value < product.stock.length) {
+                    quantityInput.value = parseInt(quantityInput.value) + 1;
+                }
+            };
+            
+            quantityInput.onchange = () => {
+                let value = parseInt(quantityInput.value);
+                if (value < 1) value = 1;
+                if (value > product.stock.length) value = product.stock.length;
+                quantityInput.value = value;
+            };
         } else {
-            stockSelect.innerHTML = '<option value="">Out of Stock</option>';
+            stockSelect.innerHTML = `
+                <option value="">Product Unavailable</option>
+            `;
             buyButton.disabled = true;
         }
 
@@ -72,8 +111,11 @@ document.addEventListener('DOMContentLoaded', function() {
         buyButton.onclick = async function() {
             const selectedPayment = document.querySelector('.payment-option.selected').dataset.method;
             const selectedStockIndex = parseInt(stockSelect.value);
-            const selectedStock = product.stock[selectedStockIndex];
-
+            const quantity = parseInt(document.getElementById('quantityInput').value);
+            
+            // Get the selected stock items
+            const selectedStock = product.stock.slice(0, quantity);
+            
             try {
                 if (selectedPayment === 'card') {
                     const orderId = 'st_' + Math.random().toString(36).substring(2, 8);
@@ -84,8 +126,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            product_name: product.title,
-                            price: product.price,
+                            product_name: `${product.title} x${quantity}`,
+                            price: product.price * quantity,
                             order_id: orderId,
                             success_url: window.location.origin + `/customer-panel.html?order_id=${orderId}&status=success`,
                             cancel_url: window.location.href
@@ -98,20 +140,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     const session = await response.json();
                     
-                    // Save pending order
+                    // Update the stock removal
+                    product.stock.splice(0, quantity);
+                    localStorage.setItem('storeProducts', JSON.stringify(products));
+                    
+                    // Update the pending order
                     const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
                     pendingOrders.push({
                         id: orderId,
                         product: product.title,
-                        price: product.price,
+                        quantity: quantity,
+                        price: product.price * quantity,
                         stock: selectedStock,
                         timestamp: Date.now()
                     });
                     localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
-
-                    // Remove used stock
-                    product.stock.splice(selectedStockIndex, 1);
-                    localStorage.setItem('storeProducts', JSON.stringify(products));
 
                     // Redirect to Stripe
                     const stripe = Stripe('pk_test_51OQofSHGgwl4L4aFBCBC75IHsfCXl4cV1yF3zFqpAdGJjprOTMVrgtawnBfSwzJOoePfshv1bdcnzFPyddaZl6bx00AHnVHXAJ');
@@ -125,43 +168,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (selectedPayment === 'paypal') {
                     const orderId = 'pp_' + Math.random().toString(36).substring(2, 8);
                     
-                    // Save pending order
+                    // Update the stock removal
+                    product.stock.splice(0, quantity);
+                    localStorage.setItem('storeProducts', JSON.stringify(products));
+                    
+                    // Update the pending order
                     const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
                     pendingOrders.push({
                         id: orderId,
                         product: product.title,
-                        price: product.price,
+                        quantity: quantity,
+                        price: product.price * quantity,
                         stock: selectedStock,
                         timestamp: Date.now()
                     });
                     localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
 
-                    // Remove used stock
-                    product.stock.splice(selectedStockIndex, 1);
-                    localStorage.setItem('storeProducts', JSON.stringify(products));
-
                     // Redirect to PayPal
-                    window.location.href = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=YOUR_PAYPAL_EMAIL&item_name=${encodeURIComponent(product.title)}&amount=${product.price}&currency_code=USD&return=${encodeURIComponent(window.location.origin + '/customer-panel.html?order_id=' + orderId + '&status=success')}`;
+                    window.location.href = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=YOUR_PAYPAL_EMAIL&item_name=${encodeURIComponent(product.title)}&amount=${product.price * quantity}&currency_code=USD&return=${encodeURIComponent(window.location.origin + '/customer-panel.html?order_id=' + orderId + '&status=success')}`;
                 } else if (selectedPayment === 'hood') {
                     const orderId = 'm_' + Math.random().toString(36).substring(2, 8);
                     
-                    // Save pending order
+                    // Update the stock removal
+                    product.stock.splice(0, quantity);
+                    localStorage.setItem('storeProducts', JSON.stringify(products));
+                    
+                    // Update the pending order
                     const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
                     pendingOrders.push({
                         id: orderId,
                         product: product.title,
-                        price: product.price,
+                        quantity: quantity,
+                        price: product.price * quantity,
                         stock: selectedStock,
                         timestamp: Date.now()
                     });
                     localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
 
-                    // Remove used stock
-                    product.stock.splice(selectedStockIndex, 1);
-                    localStorage.setItem('storeProducts', JSON.stringify(products));
-
                     // Redirect to Hood Pay
-                    window.location.href = `https://pay.hood-pay.com/pay?amount=${product.price.toFixed(2)}&currency=USD&order_id=${orderId}&product_name=${encodeURIComponent(product.title)}&success_url=${encodeURIComponent(window.location.origin + '/customer-panel.html')}&merchant_id=23750`;
+                    window.location.href = `https://pay.hood-pay.com/pay?amount=${product.price * quantity}&currency=USD&order_id=${orderId}&product_name=${encodeURIComponent(product.title)}&success_url=${encodeURIComponent(window.location.origin + '/customer-panel.html')}&merchant_id=23750`;
                 }
             } catch (error) {
                 console.error('Payment error:', error);
