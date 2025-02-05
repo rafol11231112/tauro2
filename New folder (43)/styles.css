@@ -1952,3 +1952,16 @@ th {
 .guest-btn i {
     font-size: 1.2rem;
 }
+
+/* Add these styles for the locked button state */
+.buy-btn.locked {
+    background: rgba(255, 0, 0, 0.5);
+}
+
+.buy-btn.locked:hover {
+    background: rgba(255, 0, 0, 0.6);
+}
+
+.buy-btn i {
+    margin-right: 0.5rem;
+}
