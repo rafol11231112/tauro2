@@ -71,8 +71,35 @@ document.addEventListener('DOMContentLoaded', checkLoginStatus);
 // Add this function to handle displaying products
 function displayProducts() {
     const productsContainer = document.querySelector('.product-grid');
-    const products = JSON.parse(localStorage.getItem('storeProducts')) || [];
     
+    // Default products if none exist
+    const defaultProducts = [
+        {
+            title: 'OTP Bot',
+            price: 18.99,
+            description: 'Automates One-Time Passwords for secure logins.',
+            stock: ['Item 1', 'Item 2', 'Item 3'],
+            payment_methods: ['card', 'paypal', 'hood'],
+            category: 'software'
+        },
+        {
+            title: 'SMS Bot',
+            price: 24.99,
+            description: 'Advanced SMS automation tool.',
+            stock: ['Item 1', 'Item 2', 'Item 3'],
+            payment_methods: ['card', 'paypal', 'hood'],
+            category: 'software'
+        }
+    ];
+
+    // Get products from localStorage or use defaults
+    let products = JSON.parse(localStorage.getItem('storeProducts')) || defaultProducts;
+    
+    // Save default products if none exist
+    if (!localStorage.getItem('storeProducts')) {
+        localStorage.setItem('storeProducts', JSON.stringify(defaultProducts));
+    }
+
     productsContainer.innerHTML = products.map((product, index) => `
         <a href="product.html?id=${index}" class="product-card">
             <h3>${product.title}</h3>
@@ -87,12 +114,43 @@ function displayProducts() {
     `).join('');
 }
 
-// Update admin.js to save products with the right format
+// Update admin.js to handle product updates
 document.addEventListener('DOMContentLoaded', function() {
     // ... existing code ...
     
     // Call displayProducts when the page loads
     displayProducts();
+
+    // If we're on admin page and the form exists
+    const productForm = document.getElementById('addProductForm');
+    if (productForm) {
+        productForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(productForm);
+            const newProduct = {
+                title: formData.get('title'),
+                price: parseFloat(formData.get('price')),
+                description: formData.get('description'),
+                stock: [], // Add stock items as needed
+                payment_methods: ['card', 'paypal', 'hood'],
+                category: formData.get('category')
+            };
+
+            // Get existing products
+            const products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+            products.push(newProduct);
+
+            // Save updated products
+            localStorage.setItem('storeProducts', JSON.stringify(products));
+            
+            // Refresh the display
+            displayProducts();
+            
+            // Clear form
+            productForm.reset();
+        });
+    }
 });
 
 function createReview() {
