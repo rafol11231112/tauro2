@@ -1,2 +1,4 @@
 stripe==5.4.0
-secure-smtplib==0.1.1 
+secure-smtplib==0.1.1
+flask==2.0.1
+flask-cors==3.0.10 
