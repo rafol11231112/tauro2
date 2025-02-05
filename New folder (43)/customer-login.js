@@ -42,10 +42,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('customerEmail', email);
                 localStorage.setItem('customerName', data.user.fullname);
                 
-                // Check for return URL
-                const returnUrl = new URLSearchParams(window.location.search).get('return');
-                if (returnUrl) {
-                    window.location.href = returnUrl;
+                // Check for saved product URL
+                const intendedUrl = localStorage.getItem('intendedProductUrl');
+                if (intendedUrl) {
+                    localStorage.removeItem('intendedProductUrl'); // Clear it
+                    window.location.href = intendedUrl;
                 } else {
                     window.location.href = 'index.html';
                 }
@@ -205,10 +206,11 @@ function enterGuestMode() {
     localStorage.setItem('customerName', 'Guest User');
     localStorage.setItem('isGuestMode', 'true');
     
-    // Check for return URL
-    const returnUrl = new URLSearchParams(window.location.search).get('return');
-    if (returnUrl) {
-        window.location.href = returnUrl;
+    // Check for saved product URL
+    const intendedUrl = localStorage.getItem('intendedProductUrl');
+    if (intendedUrl) {
+        localStorage.removeItem('intendedProductUrl'); // Clear it
+        window.location.href = intendedUrl;
     } else {
         window.location.href = 'index.html';
     }
