@@ -74,7 +74,7 @@ function displayProducts() {
     const products = JSON.parse(localStorage.getItem('storeProducts')) || [];
     
     productsContainer.innerHTML = products.map((product, index) => `
-        <a href="#" class="product-card" data-product-id="${index}">
+        <div class="product-card" data-product-id="${index}">
             <h3>${product.title}</h3>
             <p class="description">${product.description}</p>
             <div class="price-row">
@@ -83,7 +83,7 @@ function displayProducts() {
                     ${product.stock.length > 0 ? 'IN STOCK ✓' : 'OUT OF STOCK'}
                 </span>
             </div>
-        </a>
+        </div>
     `).join('');
 
     // Add click handlers for products
@@ -96,7 +96,8 @@ function displayProducts() {
             if (!isLoggedIn) {
                 // Save product URL to redirect after login
                 const productUrl = `product.html?id=${productId}`;
-                window.location.href = `customer-login.html?return=${encodeURIComponent(productUrl)}`;
+                localStorage.setItem('intendedProductUrl', productUrl); // Save intended URL
+                window.location.href = 'customer-login.html';
             } else {
                 // If logged in, go directly to product
                 window.location.href = `product.html?id=${productId}`;
