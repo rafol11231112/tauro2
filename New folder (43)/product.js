@@ -1,22 +1,22 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Check login first
+    const isLoggedIn = localStorage.getItem('customerLoggedIn') === 'true';
+    if (!isLoggedIn) {
+        window.location.href = 'customer-login.html';
+        return;
+    }
+
     // Get product ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
 
-    // Verify login status
-    const isLoggedIn = localStorage.getItem('customerLoggedIn') === 'true';
-    if (!isLoggedIn) {
-        window.location.href = `customer-login.html?return=${encodeURIComponent(window.location.href)}`;
-        return;
-    }
-
     // Get elements
-    const productTitle = document.querySelector('.product-title');
-    const productPrice = document.querySelector('.product-price');
-    const productDescription = document.querySelector('.product-description');
-    const stockCount = document.querySelector('.stock-count');
-    const quantityInput = document.getElementById('quantity');
-    const paymentMethods = document.querySelector('.payment-methods');
+    const productTitle = document.getElementById('productTitle');
+    const productPrice = document.getElementById('productPrice');
+    const productDescription = document.getElementById('productDescription');
+    const stockSelect = document.getElementById('stockSelect');
+    const paymentOptions = document.getElementById('paymentOptions');
+    const buyButton = document.getElementById('buyButton');
 
     // Get products from localStorage
     const products = JSON.parse(localStorage.getItem('storeProducts')) || [];
@@ -30,7 +30,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Simplified stock selection and quantity
         if (product.stock && product.stock.length > 0) {
-            stockCount.textContent = `${product.title} (${product.stock.length} in stock)`;
+            stockSelect.innerHTML = `
+                <option value="">Select to Purchase</option>
+                <option value="0">${product.title} (${product.stock.length} in stock)</option>
+            `;
             
             // Add quantity selector after stock selection
             const quantityDiv = document.createElement('div');
@@ -43,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button type="button" class="quantity-btn plus">+</button>
                 </div>
             `;
-            stockCount.parentNode.appendChild(quantityDiv);
+            stockSelect.parentNode.appendChild(quantityDiv);
             
             // Handle quantity controls
             const quantityInput = document.getElementById('quantityInput');
@@ -69,7 +72,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 quantityInput.value = value;
             };
         } else {
-            stockCount.textContent = 'Product Unavailable';
+            stockSelect.innerHTML = `
+                <option value="">Product Unavailable</option>
+            `;
             buyButton.disabled = true;
         }
 
@@ -90,14 +95,14 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.onclick = function() {
                 document.querySelectorAll('.payment-option').forEach(b => b.classList.remove('selected'));
                 this.classList.add('selected');
-                buyButton.disabled = !quantityInput.value;
+                buyButton.disabled = !stockSelect.value;
             };
             
-            paymentMethods.appendChild(btn);
+            paymentOptions.appendChild(btn);
         });
 
         // Handle stock selection
-        quantityInput.onchange = function() {
+        stockSelect.onchange = function() {
             const selectedPayment = document.querySelector('.payment-option.selected');
             buyButton.disabled = !this.value || !selectedPayment;
         };
@@ -105,8 +110,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Handle buy button
         buyButton.onclick = async function() {
             const selectedPayment = document.querySelector('.payment-option.selected').dataset.method;
-            const selectedStockIndex = parseInt(quantityInput.value);
-            const quantity = parseInt(quantityInput.value);
+            const selectedStockIndex = parseInt(stockSelect.value);
+            const quantity = parseInt(document.getElementById('quantityInput').value);
             
             // Get the selected stock items
             const selectedStock = product.stock.slice(0, quantity);
@@ -178,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Create PayPal URL with proper parameters
                     const paypalUrl = new URL('https://www.paypal.com/cgi-bin/webscr');
                     paypalUrl.searchParams.append('cmd', '_xclick');
-                    paypalUrl.searchParams.append('business', 'eyalcodes2007@gmail.com'); // Replace with your PayPal email
+                    paypalUrl.searchParams.append('business', 'YOUR_PAYPAL_EMAIL@gmail.com'); // Replace with your PayPal email
                     paypalUrl.searchParams.append('item_name', encodeURIComponent(`${product.title} x${quantity}`));
                     paypalUrl.searchParams.append('amount', (product.price * quantity).toFixed(2));
                     paypalUrl.searchParams.append('currency_code', 'USD');
