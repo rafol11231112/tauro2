@@ -1,51 +1,69 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Get URL parameters
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check for successful payment
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get('order_id');
-    const paymentStatus = urlParams.get('status');
-    
-    console.log('URL Params:', { orderId, paymentStatus }); // Debug log
-    
-    if (orderId && paymentStatus === 'success') {
+    const status = urlParams.get('status');
+
+    if (orderId && status === 'success') {
+        console.log('Processing successful payment:', orderId);
+        
         // Get pending order
         const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
         const orderIndex = pendingOrders.findIndex(order => order.id === orderId);
         
         if (orderIndex !== -1) {
             const order = pendingOrders[orderIndex];
-            
-            // Verify payment
-            verifyPayment(orderId).then(verified => {
-                if (verified) {
-                    // Remove from pending orders
-                    pendingOrders.splice(orderIndex, 1);
-                    localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
-                    
-                    // Add to purchases
-                    const purchases = JSON.parse(localStorage.getItem('customerPurchases')) || [];
-                    purchases.push({
-                        id: orderId,
+            console.log('Found pending order:', order);
+
+            try {
+                // Send email
+                const customerEmail = localStorage.getItem('customerEmail');
+                console.log('Sending email to:', customerEmail);
+                
+                const emailResponse = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        customerEmail: customerEmail,
                         product: order.product,
-                        price: order.price,
-                        paymentMethod: 'Card',
-                        date: new Date().toLocaleDateString(),
-                        delivered: true,
+                        orderId: orderId,
                         item: order.stock
-                    });
-                    localStorage.setItem('customerPurchases', JSON.stringify(purchases));
-                    
-                    // Update product stock
-                    const products = JSON.parse(localStorage.getItem('storeProducts'));
-                    const product = products.find(p => p.title === order.product);
-                    if (product) {
-                        product.stock = product.stock.filter(item => item !== order.stock);
-                        localStorage.setItem('storeProducts', JSON.stringify(products));
-                    }
-                    
-                    // Refresh the page to show the purchase
-                    window.location.reload();
-                }
-            });
+                    })
+                });
+
+                const emailResult = await emailResponse.json();
+                console.log('Email response:', emailResult);
+
+                // Add to purchases regardless of email status
+                const purchases = JSON.parse(localStorage.getItem('customerPurchases')) || [];
+                purchases.push({
+                    id: orderId,
+                    product: order.product,
+                    price: order.price,
+                    quantity: order.quantity,
+                    paymentMethod: 'Card',
+                    date: new Date().toLocaleDateString(),
+                    delivered: true,
+                    item: order.stock
+                });
+
+                // Remove from pending orders
+                pendingOrders.splice(orderIndex, 1);
+
+                // Save changes
+                localStorage.setItem('customerPurchases', JSON.stringify(purchases));
+                localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+
+                console.log('Purchase completed successfully');
+                
+                // Refresh the page to show the purchase
+                window.location.href = 'customer-panel.html';
+            } catch (error) {
+                console.error('Error processing purchase:', error);
+                alert('There was an error processing your purchase. Please contact support.');
+            }
         }
     }
 });
