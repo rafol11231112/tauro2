@@ -278,6 +278,35 @@ def create_checkout_session():
         print("Stripe error:", str(e))
         return jsonify({'error': str(e)}), 500
 
+# Add admin authentication middleware
+def require_admin(handler):
+    def wrapper(self, *args, **kwargs):
+        auth_token = self.headers.get('Authorization')
+        if not auth_token or not verify_admin_token(auth_token):
+            self.send_response(401)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'success': False,
+                'message': 'Unauthorized'
+            }).encode())
+            return
+        return handler(self, *args, **kwargs)
+    return wrapper
+
+class handler(BaseHTTPRequestHandler):
+    @require_admin
+    def do_GET(self):
+        if self.path == '/api/admin/products':
+            # Handle admin product requests
+            pass
+
+    @require_admin
+    def do_POST(self):
+        if self.path == '/api/admin/products':
+            # Handle admin product creation
+            pass
+
 if __name__ == '__main__':
     try:
         print("\n✨ API Server starting...")
