@@ -68,13 +68,13 @@ function checkLoginStatus() {
 // Call this function when the page loads
 document.addEventListener('DOMContentLoaded', checkLoginStatus);
 
-// Add this function to handle displaying products
+// Update the displayProducts function
 function displayProducts() {
     const productsContainer = document.querySelector('.product-grid');
     const products = JSON.parse(localStorage.getItem('storeProducts')) || [];
     
     productsContainer.innerHTML = products.map((product, index) => `
-        <a href="product.html?id=${index}" class="product-card">
+        <a href="#" class="product-card" data-product-id="${index}">
             <h3>${product.title}</h3>
             <p class="description">${product.description}</p>
             <div class="price-row">
@@ -85,14 +85,30 @@ function displayProducts() {
             </div>
         </a>
     `).join('');
+
+    // Add click handlers for products
+    document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            e.preventDefault();
+            const productId = card.dataset.productId;
+            const isLoggedIn = localStorage.getItem('customerLoggedIn') === 'true';
+            
+            if (!isLoggedIn) {
+                // Save product URL to redirect after login
+                const productUrl = `product.html?id=${productId}`;
+                window.location.href = `customer-login.html?return=${encodeURIComponent(productUrl)}`;
+            } else {
+                // If logged in, go directly to product
+                window.location.href = `product.html?id=${productId}`;
+            }
+        });
+    });
 }
 
-// Update admin.js to save products with the right format
+// Make sure to call displayProducts when the page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
-    
-    // Call displayProducts when the page loads
     displayProducts();
+    // ... rest of your existing code
 });
 
 function createReview() {
