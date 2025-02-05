@@ -29,12 +29,20 @@ document.addEventListener('DOMContentLoaded', async function() {
                         customerEmail: customerEmail,
                         product: order.product,
                         orderId: orderId,
-                        item: order.stock
+                        item: Array.isArray(order.stock) ? order.stock.join('\n') : order.stock
                     })
                 });
 
+                if (!emailResponse.ok) {
+                    throw new Error(`HTTP error! status: ${emailResponse.status}`);
+                }
+
                 const emailResult = await emailResponse.json();
                 console.log('Email response:', emailResult);
+
+                if (!emailResult.success) {
+                    throw new Error(emailResult.error || 'Failed to send email');
+                }
 
                 // Add to purchases regardless of email status
                 const purchases = JSON.parse(localStorage.getItem('customerPurchases')) || [];
@@ -116,15 +124,19 @@ async function verifyPayment(orderId) {
                             customerEmail: customerEmail,
                             product: pendingOrder.product,
                             orderId: orderId,
-                            item: pendingOrder.stock
+                            item: Array.isArray(pendingOrder.stock) ? pendingOrder.stock.join('\n') : pendingOrder.stock
                         })
                     });
 
-                    const emailData = await emailResponse.json();
-                    console.log('Email response:', emailData);  // Debug log
-
                     if (!emailResponse.ok) {
-                        console.error('Failed to send email:', emailData.error);
+                        throw new Error(`HTTP error! status: ${emailResponse.status}`);
+                    }
+
+                    const emailResult = await emailResponse.json();
+                    console.log('Email response:', emailResult);
+
+                    if (!emailResult.success) {
+                        throw new Error(emailResult.error || 'Failed to send email');
                     }
                 } catch (emailError) {
                     console.error('Error sending email:', emailError);
