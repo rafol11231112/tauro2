@@ -6,22 +6,41 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Get DOM elements
+    // Get DOM elements - Fix the IDs to match the HTML
     const addProductBtn = document.getElementById('addProductBtn');
     const productForm = document.getElementById('productForm');
     const addProductForm = document.getElementById('addProductForm');
     const productsContainer = document.getElementById('productsContainer');
 
+    console.log('Elements found:', {
+        addProductBtn: !!addProductBtn,
+        productForm: !!productForm,
+        addProductForm: !!addProductForm,
+        productsContainer: !!productsContainer
+    });
+
     // Show/hide product form
-    if (addProductBtn && productForm) {
-        addProductBtn.addEventListener('click', () => {
-            productForm.style.display = productForm.style.display === 'none' ? 'block' : 'none';
+    if (addProductBtn) {
+        addProductBtn.addEventListener('click', function() {
+            console.log('Add Product button clicked');
+            if (productForm) {
+                // Toggle visibility
+                if (productForm.style.display === 'none' || !productForm.style.display) {
+                    productForm.style.display = 'block';
+                } else {
+                    productForm.style.display = 'none';
+                }
+            } else {
+                console.error('Product form element not found');
+            }
         });
+    } else {
+        console.error('Add Product button not found');
     }
 
-    // Handle product form submission
+    // Handle form submission
     if (addProductForm) {
-        addProductForm.addEventListener('submit', async (e) => {
+        addProductForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             console.log('Form submitted');
 
@@ -35,8 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 category: formData.get('category') || 'software'
             };
 
-            console.log('New product:', newProduct);
-
             try {
                 const response = await fetch('/api/products', {
                     method: 'POST',
@@ -46,16 +63,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify(newProduct)
                 });
 
-                console.log('Response:', response);
-
                 if (!response.ok) {
                     throw new Error('Failed to add product');
                 }
 
                 alert('Product added successfully!');
                 addProductForm.reset();
-                productForm.style.display = 'none';
-                loadProducts(); // Refresh the products list
+                if (productForm) {
+                    productForm.style.display = 'none';
+                }
+                loadProducts();
             } catch (error) {
                 console.error('Error adding product:', error);
                 alert('Failed to add product. Please try again.');
