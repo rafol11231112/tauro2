@@ -168,11 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (selectedPayment === 'paypal') {
                     const orderId = 'pp_' + Math.random().toString(36).substring(2, 8);
                     
-                    // Update the stock removal
-                    product.stock.splice(0, quantity);
-                    localStorage.setItem('storeProducts', JSON.stringify(products));
-                    
-                    // Update the pending order
+                    // Save pending order first
                     const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
                     pendingOrders.push({
                         id: orderId,
@@ -184,8 +180,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
 
+                    // Create PayPal URL with proper parameters
+                    const paypalUrl = new URL('https://www.paypal.com/cgi-bin/webscr');
+                    paypalUrl.searchParams.append('cmd', '_xclick');
+                    paypalUrl.searchParams.append('business', 'YOUR_PAYPAL_EMAIL@gmail.com'); // Replace with your PayPal email
+                    paypalUrl.searchParams.append('item_name', encodeURIComponent(`${product.title} x${quantity}`));
+                    paypalUrl.searchParams.append('amount', (product.price * quantity).toFixed(2));
+                    paypalUrl.searchParams.append('currency_code', 'USD');
+                    paypalUrl.searchParams.append('return', encodeURIComponent(`${window.location.origin}/customer-panel.html?order_id=${orderId}&status=success`));
+                    paypalUrl.searchParams.append('cancel_return', encodeURIComponent(window.location.href));
+                    paypalUrl.searchParams.append('notify_url', encodeURIComponent(`${window.location.origin}/api/paypal-ipn`));
+                    paypalUrl.searchParams.append('custom', orderId);
+
                     // Redirect to PayPal
-                    window.location.href = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=YOUR_PAYPAL_EMAIL&item_name=${encodeURIComponent(product.title)}&amount=${product.price * quantity}&currency_code=USD&return=${encodeURIComponent(window.location.origin + '/customer-panel.html?order_id=' + orderId + '&status=success')}`;
+                    window.location.href = paypalUrl.toString();
                 } else if (selectedPayment === 'hood') {
                     const orderId = 'm_' + Math.random().toString(36).substring(2, 8);
                     
