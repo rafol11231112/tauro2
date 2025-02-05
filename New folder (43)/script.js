@@ -68,90 +68,74 @@ function checkLoginStatus() {
 // Call this function when the page loads
 document.addEventListener('DOMContentLoaded', checkLoginStatus);
 
-// Add this function to handle displaying products
-function displayProducts() {
+// Update the displayProducts function
+async function displayProducts() {
     const productsContainer = document.querySelector('.product-grid');
-    
-    // Default products if none exist
-    const defaultProducts = [
-        {
-            title: 'OTP Bot',
-            price: 18.99,
-            description: 'Automates One-Time Passwords for secure logins.',
-            stock: ['Item 1', 'Item 2', 'Item 3'],
-            payment_methods: ['card', 'paypal', 'hood'],
-            category: 'software'
-        },
-        {
-            title: 'SMS Bot',
-            price: 24.99,
-            description: 'Advanced SMS automation tool.',
-            stock: ['Item 1', 'Item 2', 'Item 3'],
-            payment_methods: ['card', 'paypal', 'hood'],
-            category: 'software'
-        }
-    ];
+    if (!productsContainer) return;
 
-    // Get products from localStorage or use defaults
-    let products = JSON.parse(localStorage.getItem('storeProducts')) || defaultProducts;
-    
-    // Save default products if none exist
-    if (!localStorage.getItem('storeProducts')) {
-        localStorage.setItem('storeProducts', JSON.stringify(defaultProducts));
+    try {
+        // Fetch products from the API
+        const response = await fetch('/api/products');
+        const products = await response.json();
+
+        productsContainer.innerHTML = products.map((product, index) => `
+            <a href="product.html?id=${index}" class="product-card">
+                <h3>${product.title}</h3>
+                <p class="description">${product.description}</p>
+                <div class="price-row">
+                    <p class="price">$${product.price.toFixed(2)}</p>
+                    <span class="stock-status">
+                        ${product.stock.length > 0 ? 'IN STOCK ✓' : 'OUT OF STOCK'}
+                    </span>
+                </div>
+            </a>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading products:', error);
+        productsContainer.innerHTML = '<p class="error">Error loading products. Please try again later.</p>';
     }
-
-    productsContainer.innerHTML = products.map((product, index) => `
-        <a href="product.html?id=${index}" class="product-card">
-            <h3>${product.title}</h3>
-            <p class="description">${product.description}</p>
-            <div class="price-row">
-                <p class="price">$${product.price.toFixed(2)}</p>
-                <span class="stock-status">
-                    ${product.stock.length > 0 ? 'IN STOCK ✓' : 'OUT OF STOCK'}
-                </span>
-            </div>
-        </a>
-    `).join('');
 }
 
-// Update admin.js to handle product updates
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
-    
-    // Call displayProducts when the page loads
-    displayProducts();
+// Update the admin form handler
+if (productForm) {
+    productForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(productForm);
+        const newProduct = {
+            title: formData.get('title'),
+            price: parseFloat(formData.get('price')),
+            description: formData.get('description'),
+            stock: [], // Add stock items as needed
+            payment_methods: ['card', 'paypal', 'hood'],
+            category: formData.get('category')
+        };
 
-    // If we're on admin page and the form exists
-    const productForm = document.getElementById('addProductForm');
-    if (productForm) {
-        productForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(productForm);
-            const newProduct = {
-                title: formData.get('title'),
-                price: parseFloat(formData.get('price')),
-                description: formData.get('description'),
-                stock: [], // Add stock items as needed
-                payment_methods: ['card', 'paypal', 'hood'],
-                category: formData.get('category')
-            };
+        try {
+            // Send new product to the API
+            const response = await fetch('/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newProduct)
+            });
 
-            // Get existing products
-            const products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-            products.push(newProduct);
+            if (!response.ok) {
+                throw new Error('Failed to add product');
+            }
 
-            // Save updated products
-            localStorage.setItem('storeProducts', JSON.stringify(products));
-            
             // Refresh the display
             displayProducts();
             
             // Clear form
             productForm.reset();
-        });
-    }
-});
+        } catch (error) {
+            console.error('Error adding product:', error);
+            alert('Failed to add product. Please try again.');
+        }
+    });
+}
 
 function createReview() {
     return {
