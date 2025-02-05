@@ -3,66 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>Admin Panel - Your Store</title>
     <link rel="stylesheet" href="admin-styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <div class="background-dots"></div>
+    
     <div class="admin-container">
-        <header class="admin-header">
-            <h1>Admin Panel</h1>
-            <button class="logout-btn">
+        <div class="admin-sidebar">
+            <div class="sidebar-header">
+                <span class="brand-text">Your</span>
+                <span class="brand-text-pro">.store</span>
+                <span class="pro-badge">PRO</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-box"></i>
+                    Products
+                </a>
+                <a href="orders.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    Orders
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </a>
+            </nav>
+            <button onclick="logout()" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
-        </header>
+        </div>
 
-        <main class="admin-main">
-            <div class="admin-actions">
-                <button id="addProductBtn" class="action-btn">
-                    <i class="fas fa-plus"></i> Add New Product
+        <div class="admin-content">
+            <div class="top-bar">
+                <h1>Products</h1>
+                <button id="addProductBtn" class="primary-btn">
+                    <i class="fas fa-plus"></i> Add Product
                 </button>
             </div>
 
-            <div id="productForm" class="form-container" style="display: none;">
-                <form id="addProductForm" class="product-form">
-                    <div class="form-group">
-                        <label for="title">Product Title</label>
-                        <input type="text" id="title" name="title" required>
+            <div id="productForm" class="product-form" style="display: none;">
+                <form id="addProductForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Price ($)</label>
+                            <input type="number" name="price" step="0.01" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Description</label>
+                            <textarea name="description" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="software">Software</option>
+                                <option value="services">Services</option>
+                            </select>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="price">Price ($)</label>
-                        <input type="number" id="price" name="price" step="0.01" required>
+                    <div class="form-actions">
+                        <button type="submit" class="primary-btn">Save Product</button>
+                        <button type="button" class="secondary-btn" id="cancelBtn">Cancel</button>
                     </div>
-
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="stock">Stock Items (comma-separated)</label>
-                        <input type="text" id="stock" name="stock" placeholder="Item1, Item2, Item3" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <select id="category" name="category">
-                            <option value="software">Software</option>
-                            <option value="service">Service</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="submit-btn">
-                        <i class="fas fa-save"></i> Save Product
-                    </button>
                 </form>
             </div>
 
-            <div id="productsContainer" class="products-grid">
+            <div class="products-list" id="productsList">
                 <!-- Products will be loaded here -->
             </div>
-        </main>
+        </div>
     </div>
 
     <script src="admin.js"></script>
