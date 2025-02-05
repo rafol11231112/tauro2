@@ -8,7 +8,6 @@
   ],
   "routes": [
     { "src": "/api/send-email", "dest": "/api/send-email.py" },
-    { "src": "/api/create-stripe-session", "dest": "/api/create-stripe-session.py" },
     { "src": "/api/(.*)", "dest": "/api/index.py" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
