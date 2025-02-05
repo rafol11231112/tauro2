@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Check login first - but don't redirect immediately
-    const isLoggedIn = localStorage.getItem('customerLoggedIn') === 'true';
-    const buyButton = document.getElementById('buyButton');
-
     // Get product ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
+
+    // Verify login status
+    const isLoggedIn = localStorage.getItem('customerLoggedIn') === 'true';
+    if (!isLoggedIn) {
+        window.location.href = `customer-login.html?return=${encodeURIComponent(window.location.href)}`;
+        return;
+    }
 
     // Get elements
     const productTitle = document.querySelector('.product-title');
@@ -20,34 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const product = products[productId];
 
     if (product) {
-        // Update buy button based on login status
-        buyButton.addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            if (!isLoggedIn) {
-                // Save current URL to redirect back after login
-                const currentUrl = window.location.href;
-                window.location.href = `customer-login.html?return=${encodeURIComponent(currentUrl)}`;
-                return;
-            }
-
-            // Rest of your existing buy button code...
-            const quantity = parseInt(quantityInput.value);
-            const selectedPayment = document.querySelector('input[name="payment"]:checked')?.value;
-            
-            if (!selectedPayment) {
-                alert('Please select a payment method');
-                return;
-            }
-
-            // Your existing payment processing code...
-        });
-
-        // Update button text based on login status
-        if (!isLoggedIn) {
-            buyButton.innerHTML = '<i class="fas fa-lock"></i> Login to Purchase';
-        }
-
         // Display product details
         productTitle.textContent = product.title;
         productPrice.textContent = `$${product.price.toFixed(2)}`;
