@@ -1,4 +1,17 @@
+// Add this at the start of admin.js
+function checkAdminAuth() {
+    const isAdminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+    if (!isAdminLoggedIn) {
+        window.location.href = 'admin-login.html';
+        return false;
+    }
+    return true;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Check admin auth first
+    if (!checkAdminAuth()) return;
+    
     // Get DOM elements
     const addProductBtn = document.getElementById('addProductBtn');
     const productForm = document.getElementById('productForm');
