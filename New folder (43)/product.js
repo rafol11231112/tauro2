@@ -79,27 +79,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Add payment methods
-        const paymentMethods = {
-            crypto: '<i class="fab fa-bitcoin"></i> Crypto',
-            paypal: '<i class="fab fa-paypal"></i> PayPal',
-            card: '<i class="fas fa-credit-card"></i> Card',
-            hood: '<i class="fas fa-mask"></i> Hood Pay'
-        };
+        const paymentMethods = `
+            <div class="payment-methods">
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="crypto">
+                    <span class="payment-label">
+                        <i class="fab fa-bitcoin"></i>
+                        Cryptocurrency
+                    </span>
+                </label>
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="paypal">
+                    <span class="payment-label">
+                        <i class="fab fa-paypal"></i>
+                        PayPal
+                    </span>
+                </label>
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="card">
+                    <span class="payment-label">
+                        <i class="fas fa-credit-card"></i>
+                        Card
+                    </span>
+                </label>
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="hood">
+                    <span class="payment-label">
+                        <i class="fas fa-mask"></i>
+                        Hood Pay
+                    </span>
+                </label>
+            </div>
+        `;
 
-        product.payment_methods.forEach(method => {
-            const btn = document.createElement('button');
-            btn.className = 'payment-option';
-            btn.dataset.method = method;
-            btn.innerHTML = paymentMethods[method];
-            
-            btn.onclick = function() {
-                document.querySelectorAll('.payment-option').forEach(b => b.classList.remove('selected'));
-                this.classList.add('selected');
-                buyButton.disabled = !stockSelect.value;
-            };
-            
-            paymentOptions.appendChild(btn);
-        });
+        paymentOptions.innerHTML = paymentMethods;
 
         // Handle stock selection
         stockSelect.onchange = function() {
@@ -215,6 +228,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Redirect to Hood Pay
                     window.location.href = `https://pay.hood-pay.com/pay?amount=${product.price * quantity}&currency=USD&order_id=${orderId}&product_name=${encodeURIComponent(product.title)}&success_url=${encodeURIComponent(window.location.origin + '/customer-panel.html')}&merchant_id=23750`;
+                } else if (selectedPayment === 'crypto') {
+                    const orderId = 'cm_' + Math.random().toString(36).substring(2, 8);
+                    
+                    try {
+                        const response = await fetch('/api/cryptomus', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                amount: product.price * quantity,
+                                order_id: orderId,
+                                origin: window.location.origin
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        
+                        // Save pending order
+                        const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+                        pendingOrders.push({
+                            id: orderId,
+                            product: product.title,
+                            quantity: quantity,
+                            price: product.price * quantity,
+                            stock: selectedStock,
+                            timestamp: Date.now()
+                        });
+                        localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+
+                        // Redirect to Cryptomus payment page
+                        window.location.href = data.url;
+                    } catch (error) {
+                        console.error('Cryptomus payment error:', error);
+                        alert('Payment failed. Please try again.');
+                    }
                 }
             } catch (error) {
                 console.error('Payment error:', error);
